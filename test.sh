@@ -17,3 +17,5 @@ log_info() {
 log_error() {
   echo -e "${RED}$1${RESET}"
 }
+
+echo "succsess"

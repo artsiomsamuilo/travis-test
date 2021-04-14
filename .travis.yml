@@ -2,26 +2,49 @@ language: node_js
 node_js:
   - 10
 
-stage:
-  - dev
-  - prod
+before_install:
+  - sudo apt-get install htop 
+  - wget -qO - https://releases.jfrog.io/artifactory/api/gpg/key/public | sudo apt-key add -
+  - echo "deb https://releases.jfrog.io/artifactory/jfrog-debs xenial contrib" | sudo tee -a /etc/apt/sources.list
+  - sudo apt update
+  - sudo apt install -y jfrog-cli  
 
-branches:
-  only:
-    - stages
+stage:
+  - test
+  - scan
+#  - prod
 
 jobs:
   include:
-    - stage: dev
-      name: "test1"
-      script: echo "hello world from dev11"
-      
-    - script: echo "hello world from dev22"
-      name: test2     
-    
-    - stage: prod
-      name: test1
-      script: echo "hello world from prod11"
-      
-    - script: echo "hello world from prod22"
-      name: test2
+    - stage: test
+      name: "Run tests and upload results to artifactory"
+      script: 
+        - dpkg-query -l | grep htop > artifact
+        - jfrog rt u artifact travis_ci_artifacts/$TRAVIS_BUILD_NUMBER/ --url=https://asartifactory.jfrog.io/artifactory/ --apikey=$JFROG_API_KEY  
+
+    - stage: scan
+      name: "Download scan results"
+      script:
+        - jfrog rt dl travis_ci_artifacts/$TRAVIS_BUILD_NUMBER/artifact --url=https://asartifactory.jfrog.io/artifactory/ --apikey=$JFROG_API_KEY
+
+#    - stage: dev
+#      name: "test1"
+#      script: dpkg-query -l | grep htop
+#      
+#    - script: echo "hello world from dev22"
+#      name: test2     
+#
+#    - script: echo "hello world from dev33"
+#      name: test3  
+#    
+#    - stage: prod
+#      name: test1
+#      script: echo "hello world from prod11"
+#      
+#    - script: echo "hello world from prod22"
+#      name: test2
+
+
+env:
+  global:
+    - export JFROG_CLI_OFFER_CONFIG=false
