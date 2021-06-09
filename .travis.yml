@@ -20,12 +20,22 @@ jobs:
       name: "Run tests and upload results to artifactory"
       script: 
         - dpkg-query -l | grep htop > artifact
-        - jfrog rt u artifact travis_ci_artifacts/$TRAVIS_BUILD_NUMBER/ --url=https://asartifactory.jfrog.io/artifactory/ --apikey=$JFROG_API_KEY  
+        - jfrog rt u artifact travis_ci_artifacts/$TRAVIS_BUILD_NUMBER/ --url=https://asartifactory.jfrog.io/artifactory/ --apikey=$JFROG_API_KEY
+
+    - stage: test
+      name: "Run echo test"
+      script: 
+        - echo "Echo test"      
 
     - stage: scan
       name: "Download scan results"
       script:
         - jfrog rt dl travis_ci_artifacts/$TRAVIS_BUILD_NUMBER/artifact --url=https://asartifactory.jfrog.io/artifactory/ --apikey=$JFROG_API_KEY
+
+    - stage: scan
+      name: "Run echo scan"
+      script: 
+        - echo "Echo scan"    
 
 #    - stage: dev
 #      name: "test1"
